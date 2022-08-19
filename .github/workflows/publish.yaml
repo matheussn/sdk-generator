@@ -1,0 +1,53 @@
+name: Publish sdk generator
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-sdk-generator:
+    runs-on: ubuntu-latest
+    name: Publish to Github Package Registry
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          registry-url: https://npm.pkg.github.com/
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      #- name: Run tests
+      #  run: yarn test:coverage
+
+      - name: Build Package
+        run: |
+          sudo timedatectl set-timezone Etc/GMT+3
+          yarn build
+
+      - name: Version Check
+        id: check
+        uses: EndBug/version-check@v2.0.1
+        with:
+          diff-search: true
+          file-name: package.json
+
+      - name: Publish Package
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          echo "Version change found in commit ${{ steps.check.outputs.commit }}!"
+          echo "New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"
+          npm publish
+
+      - name: Checking unchanged version package
+        if: steps.check.outputs.changed == 'false'
+        run: echo "No version change :/" && exit -1

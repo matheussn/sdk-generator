@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "dependencies": {
     "nunjucks": "^3.2.3",
     "prettier": "^2.7.1",
@@ -29,5 +33,8 @@
     "lint": "eslint ./ --ext .ts --ext .js",
     "lint:fix": "eslint ./ --ext .ts --ext .js --fix",
     "types": "node src/bin/generate-types.js"
+  },
+  "bin": {
+    "types-generator": "node dist/index.js"
   }
 }
