@@ -52,6 +52,7 @@ try {
   }
 
   for (const file of schemasFiles) {
+    console.log(`${file}:`)
     const fileName = path.join(schemasDir, file)
     const outFile = file.replace('.yaml', '.ts')
     schemaMap.set(file, outFile)
@@ -62,6 +63,7 @@ try {
   const referencesFiles = fs.readdirSync(referencesDir)
 
   for (const file of referencesFiles) {
+    console.log(`${file}:`)
     const fileName = path.join(referencesDir, file)
     const api = new SchemaFromOpenApi(
       fileName,

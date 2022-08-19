@@ -28,5 +28,6 @@ export const renderTemplate = (name: string, destinationFile: string, params: Pa
     tabWidth: 2,
     semi: false,
   })
+  console.log(`Create File: ${destinationFile}`)
   fs.writeFileSync(destinationFile, finalContent)
 }
