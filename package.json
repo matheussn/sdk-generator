@@ -1,6 +1,6 @@
 {
   "name": "@matheussn/sdk-generator",
-  "version": "0.0.1-beta",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -38,6 +38,6 @@
     "types": "node src/bin/generate-types.js"
   },
   "bin": {
-    "types-generator": "node dist/index.js"
+    "sdk-gen": "dist/index.js"
   }
 }
