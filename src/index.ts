@@ -74,5 +74,6 @@ try {
     api.generateTypes()
   }
 } catch (error) {
+  console.error(error)
   fs.rmdirSync(outDir)
 }
