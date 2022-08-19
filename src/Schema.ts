@@ -6,7 +6,9 @@ import { renderTemplate } from './renders'
 
 export class Schema {
   private schemaFile: any
+
   private sourceDir: string
+
   private fileName: string
 
   constructor(schemaYaml: string, sourceDir: string, resultFileName: string) {

@@ -6,8 +6,8 @@ import { {{ import.to }} } from './{{ import.from }}'
 {% for model in models %}
   {% if model.hasDescription() %}
   /*
-  * {{ model.description }}
-  */
+   * {{ model.description }}
+   **/
   {% endif %}
   {% if model.isSimpleType or model.isArrayType %}
     export type {{ model.name }} = {{model.type}};

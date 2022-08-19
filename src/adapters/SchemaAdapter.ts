@@ -1,4 +1,4 @@
-import { renderTemplateToString } from "../renders"
+import { renderTemplateToString } from '../renders'
 import { PropertyAdapter } from './PropertyAdapter'
 
 export interface OmmitAdapter {
@@ -13,43 +13,50 @@ export interface Import {
 
 export class SchemaAdapter {
   readonly description: string
+
   readonly isSimpleType: boolean
+
   readonly isArrayType: boolean
 
   extends: string[]
+
   ommit: OmmitAdapter
+
   type: string
+
   imports: Import[]
+
   properties: any[]
 
-  constructor(readonly name: string, readonly schema: any, readonly context?: any, readonly schemaMap?: Map<string, string>) {
+  constructor(
+    readonly name: string,
+    readonly schema: any,
+    readonly context?: any,
+    readonly schemaMap?: Map<string, string>,
+  ) {
     this.imports = []
     this.extends = []
     this.description = schema.description
     this.isSimpleType = this.isSimpleTypeSchemaType(schema.type)
     const schemaType = schema.type
-    this.isArrayType = 'array' === schemaType
+    this.isArrayType = schemaType === 'array'
     if (schema.allOf) {
-      let extendedModelSchema = schema;
+      let extendedModelSchema = schema
       const hasTypeChange = schema.allOf.some(elem => elem.required !== undefined)
-      schema.allOf.forEach((allOfSchema) => {
+      schema.allOf.forEach(allOfSchema => {
         if (hasTypeChange) {
           this.buildOmmitProperties(allOfSchema)
+        } else if (allOfSchema.$ref) {
+          this.extends.push(this.getTypeFromReference(allOfSchema.$ref))
         } else {
-          if (allOfSchema.$ref) {
-            this.extends.push(this.getTypeFromReference(allOfSchema.$ref))
-          } else {
-            extendedModelSchema = allOfSchema
-          }
+          extendedModelSchema = allOfSchema
         }
       })
       this.schema = extendedModelSchema
-    }
-    else if (this.isSimpleType) {
+    } else if (this.isSimpleType) {
       this.schema = schema
       this.type = this.getTypeFromSimpleType(schemaType)
-    }
-    else {
+    } else {
       this.schema = schema
       this.type = this.isArrayType ? this.getTypeFromArrayType() : undefined
     }
@@ -112,7 +119,7 @@ export class SchemaAdapter {
   }
 
   private getTypeFromStringType(schema: any, isArray: boolean) {
-    schema = schema !== null && schema !== void 0 ? schema : this.schema
+    schema = schema !== null && schema !== undefined ? schema : this.schema
     if (schema.enum) {
       const type = `'${schema.enum.join("' | '")}'`
       return isArray ? `(${type})` : type
@@ -124,8 +131,11 @@ export class SchemaAdapter {
   }
 
   private getTypeFromArrayType(arraySchemaObject?: any) {
-    const schema = arraySchemaObject !== null && arraySchemaObject !== void 0 ? arraySchemaObject : this.schema
-    const items = schema.items
+    const schema =
+      arraySchemaObject !== null && arraySchemaObject !== undefined
+        ? arraySchemaObject
+        : this.schema
+    const { items } = schema
 
     if (items.$ref) {
       const type = this.getTypeFromReference(items.$ref)
@@ -138,7 +148,7 @@ export class SchemaAdapter {
       const type = this.getTypeFromSimpleType(itemsType, items, true)
       return `${type}[]`
     }
-    const isArrayType = 'array' === items.type
+    const isArrayType = items.type === 'array'
     if (isArrayType) {
       const type = this.getTypeFromArrayType(items)
       return `${type}[]`
@@ -154,39 +164,48 @@ export class SchemaAdapter {
   private getExternalReferences(refName: string) {
     const nameFile = this.getTypeFromReference(refName)
     const name = nameFile.split('.')[0]
-    this.imports = [...this.imports, {to: name, from: this.schemaMap.get(nameFile).split('.')[0] }]
+    this.imports = [
+      ...this.imports,
+      { to: name, from: this.schemaMap.get(nameFile).split('.')[0] },
+    ]
     return name
   }
 
   private handleProperties(properties: PropertyAdapter[], schemaObject?: any) {
-    const schema = (schemaObject !== null && schemaObject !== undefined) ? schemaObject : this.schema
-    const objectProperties = schema.properties !== undefined && schema.properties !== undefined ? schema.properties : {}
+    const schema =
+      schemaObject !== null && schemaObject !== undefined ? schemaObject : this.schema
+    const objectProperties =
+      schema.properties !== undefined && schema.properties !== undefined
+        ? schema.properties
+        : {}
     const hasRequired = schema.required !== null && schema.required !== undefined
 
-    Object.keys(objectProperties).forEach((propertyName) => {
-      const property = objectProperties[propertyName];
+    Object.keys(objectProperties).forEach(propertyName => {
+      const property = objectProperties[propertyName]
 
-      const isRequired = hasRequired ? schema.required.includes(propertyName): false
+      const isRequired = hasRequired ? schema.required.includes(propertyName) : false
       const propertyNameTs = `${propertyName}${isRequired ? '' : '?'}`
 
       if (property.$ref) {
-        properties.push(new PropertyAdapter(propertyNameTs, this.getExternalReferences(property.$ref)))
+        properties.push(
+          new PropertyAdapter(propertyNameTs, this.getExternalReferences(property.$ref)),
+        )
       }
 
-      const isSimpleType = this.isSimpleTypeSchemaType(property.type);
+      const isSimpleType = this.isSimpleTypeSchemaType(property.type)
       if (isSimpleType) {
-        const type = this.getTypeFromSimpleType(property.type, property);
-        properties.push(new PropertyAdapter(propertyNameTs, type));
+        const type = this.getTypeFromSimpleType(property.type, property)
+        properties.push(new PropertyAdapter(propertyNameTs, type))
       }
-      const isArrayType = 'array' === property.type;
+      const isArrayType = property.type === 'array'
       if (isArrayType) {
-        const type = this.getTypeFromArrayType(property);
-        properties.push(new PropertyAdapter(propertyNameTs, type));
+        const type = this.getTypeFromArrayType(property)
+        properties.push(new PropertyAdapter(propertyNameTs, type))
       }
-      const isObjectType = 'object' == property.type
-      
+      const isObjectType = property.type === 'object'
+
       if (isObjectType && !property.properties) {
-        properties.push(new PropertyAdapter(propertyNameTs, 'Object'));
+        properties.push(new PropertyAdapter(propertyNameTs, 'Object'))
       }
 
       if (isObjectType && property.properties) {
@@ -195,14 +214,17 @@ export class SchemaAdapter {
         const type = renderTemplateToString('object-type', {
           properties: nestedProperties,
         })
-        properties.push(new PropertyAdapter(propertyNameTs, type));
+        properties.push(new PropertyAdapter(propertyNameTs, type))
       }
     })
   }
 
   private buildOmmitProperties(allOfSchema: any) {
     if (allOfSchema.$ref) {
-      this.ommit = { ...this.ommit, type: this.getTypeFromReference(allOfSchema.$ref) }
+      this.ommit = {
+        ...this.ommit,
+        type: this.getTypeFromReference(allOfSchema.$ref),
+      }
     } else {
       this.ommit = { ...this.ommit, fields: allOfSchema.required }
     }
