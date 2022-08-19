@@ -39,7 +39,7 @@ try {
     exit(0)
   }
 
-  if (fs.existsSync(schemasDir)) {
+  if (!fs.existsSync(schemasDir)) {
     console.error(`O doretório '${schemasDir}' não existe!`)
     exit(0)
   }
