@@ -12,9 +12,6 @@ jobs:
     name: Publish to Github Package Registry
     strategy:
       fail-fast: false
-    
-    env:
-      NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
     steps:
       - name: Checkout
@@ -50,6 +47,8 @@ jobs:
           echo "Version change found in commit ${{ steps.check.outputs.commit }}!"
           echo "New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"
           yarn publish
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Checking unchanged version package
         if: steps.check.outputs.changed == 'false'
