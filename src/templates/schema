@@ -1,0 +1,31 @@
+{% for import in imports %}
+
+import { {{ import.to }} } from './{{ import.from }}'
+
+{% endfor %}
+{% for model in models %}
+  {% if model.hasDescription() %}
+  /*
+  * {{ model.description }}
+  */
+  {% endif %}
+  {% if model.isSimpleType or model.isArrayType %}
+    export type {{ model.name }} = {{model.type}};
+  {% else %} 
+    {% if model.hasOmmit() %}
+      export type {{ model.name }} = Omit<{{model.ommit.type}}, {% for field in model.ommit.fields %}'{{field}}' {% if not loop.last %} | {% endif %}{% endfor %}> & {
+        {% for property in model.getOmmitProperties() %}
+          {{ property.name }}: {{ property.type }},
+        {% endfor %}
+      } 
+    {% else %}
+      export interface {{ model.name }} 
+        {% for extension in model.extends %}
+          {% if loop.first %} extends {% endif %}{{ extension }}{% if not loop.last %},{% endif %}
+        {% endfor %}{ {%- for property in model.properties %}
+        {{ property.name }}: {{ property.type }};{% endfor %}
+      }
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
