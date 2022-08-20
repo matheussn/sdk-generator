@@ -1,6 +1,6 @@
 {
   "name": "@matheussn/sdk-generator",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -31,11 +31,12 @@
     "typescript": "^4.7.4"
   },
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc -p . && yarn run copy:templates",
     "start": "ts-node src/index.ts",
     "lint": "eslint ./ --ext .ts --ext .js",
     "lint:fix": "eslint ./ --ext .ts --ext .js --fix",
-    "types": "node src/bin/generate-types.js"
+    "types": "node src/bin/generate-types.js",
+    "copy:templates": "mkdir ./dist/templates/ && cp ./src/templates/ ./dist/templates/"
   },
   "bin": {
     "sdk-gen": "dist/index.js"
