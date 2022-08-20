@@ -1,6 +1,6 @@
 {
   "name": "@matheussn/sdk-generator",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -36,7 +36,7 @@
     "lint": "eslint ./ --ext .ts --ext .js",
     "lint:fix": "eslint ./ --ext .ts --ext .js --fix",
     "types": "node src/bin/generate-types.js",
-    "copy:templates": "mkdir ./dist/templates/ && cp -r ./src/templates/ ./dist/templates/"
+    "copy:templates": "cp -r ./src/templates/ ./dist/templates/"
   },
   "bin": {
     "sdk-gen": "dist/index.js"
