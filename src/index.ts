@@ -85,9 +85,8 @@ try {
 
   runAllSchemas(referencesDir, schemaMap, (filePath, name, schemas) => {
     console.log(`${filePath}:`)
-    const fileName = path.join(referencesDir, name)
     const api = new SchemaFromOpenApi(
-      fileName,
+      filePath,
       argv.outDir,
       name.replace('.yaml', '.ts'),
       schemas,
