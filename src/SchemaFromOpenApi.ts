@@ -27,10 +27,9 @@ export class SchemaFromOpenApi {
           this.schemaMap,
         )
       })
-      const imports = models.flatMap(elem => elem.getImports())
       const dest = path.join(process.cwd(), this.sourceDir, this.fileName)
 
-      renderTemplate('schema', dest, { models, imports })
+      renderTemplate('schema', dest, { models })
     }
   }
 }

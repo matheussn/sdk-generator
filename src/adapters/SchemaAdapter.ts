@@ -1,4 +1,4 @@
-import { renderTemplateToString } from '../renders'
+import { renderTemplate, renderTemplateToString } from '../renders'
 import { PropertyAdapter } from './PropertyAdapter'
 
 export interface OmmitAdapter {
@@ -58,7 +58,7 @@ export class SchemaAdapter {
       this.type = this.getTypeFromSimpleType(schemaType)
     } else {
       this.schema = schema
-      this.type = this.isArrayType ? this.getTypeFromArrayType() : undefined
+      this.type = this.isArrayType ? this.getTypeFromArrayType(schema, name) : undefined
     }
 
     this.properties = this.setProperties()
@@ -94,6 +94,7 @@ export class SchemaAdapter {
   setProperties() {
     const properties = []
     this.handleProperties(properties)
+    // this.handleOfProperties(properties)
     return properties
   }
 
@@ -130,7 +131,7 @@ export class SchemaAdapter {
     return 'string'
   }
 
-  private getTypeFromArrayType(arraySchemaObject?: any) {
+  private getTypeFromArrayType(arraySchemaObject?: any, name?:string) {
     const schema =
       arraySchemaObject !== null && arraySchemaObject !== undefined
         ? arraySchemaObject
@@ -150,15 +151,29 @@ export class SchemaAdapter {
     }
     const isArrayType = items.type === 'array'
     if (isArrayType) {
-      const type = this.getTypeFromArrayType(items)
+      const type = this.getTypeFromArrayType(items, name)
       return `${type}[]`
     }
+
+    const isAnyOf = items.anyOf !== undefined
+    if(isAnyOf) {
+      const nestedProperties = this.handleOfProperties(items)
+      return nestedProperties.map(prop => `${prop}[]`)
+    }
+
     const nestedProperties = []
     this.handleProperties(nestedProperties, items)
     const type = renderTemplateToString('object-type', {
       properties: nestedProperties,
     })
-    return `${type}[]`
+    const newType = type.endsWith('\n') ? type.replace(/\n/g, '') : type
+    return `${newType}[]`
+  }
+
+  private camelize(str: string) {
+    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    }).replace(/\s+/g, '');
   }
 
   private getExternalReferences(refName: string) {
@@ -199,7 +214,7 @@ export class SchemaAdapter {
       }
       const isArrayType = property.type === 'array'
       if (isArrayType) {
-        const type = this.getTypeFromArrayType(property)
+        const type = this.getTypeFromArrayType(property, propertyNameTs)
         properties.push(new PropertyAdapter(propertyNameTs, type))
       }
       const isObjectType = property.type === 'object'
@@ -228,5 +243,26 @@ export class SchemaAdapter {
     } else {
       this.ommit = { ...this.ommit, fields: allOfSchema.required }
     }
+  }
+
+  private handleOfProperties(schemaObject?: any) {
+    const schema =
+      schemaObject !== null && schemaObject !== undefined ? schemaObject : this.schema
+    
+    const prop = []
+    
+    if (schema.anyOf !== undefined) {
+      schema.anyOf.forEach(anySchema => {
+        if (anySchema.$ref) {
+          if (anySchema.$ref.endsWith('.yaml')) {
+            prop.push(this.getExternalReferences(anySchema.$ref))
+          } else {
+            prop.push(this.getTypeFromReference(anySchema.$ref))
+          }
+        }
+      })
+    }
+
+    return prop
   }
 }
