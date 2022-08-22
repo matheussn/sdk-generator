@@ -139,7 +139,7 @@ export class SchemaAdapter {
     const { items } = schema
 
     if (items.$ref) {
-      const type = this.getExternalReferences(items.$ref)
+      const type = this.handleRef(items)
       return `${type}[]`
     }
 
@@ -170,12 +170,6 @@ export class SchemaAdapter {
     return `${newType}[]`
   }
 
-  private camelize(str: string) {
-    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase();
-    }).replace(/\s+/g, '');
-  }
-
   private getExternalReferences(refName: string) {
     const nameFile = this.getTypeFromReference(refName)
     const name = nameFile.split('.')[0]
@@ -203,7 +197,7 @@ export class SchemaAdapter {
 
       if (property.$ref) {
         properties.push(
-          new PropertyAdapter(propertyNameTs, this.getExternalReferences(property.$ref)),
+          new PropertyAdapter(propertyNameTs, this.handleRef(property)),
         )
       }
 
@@ -254,15 +248,19 @@ export class SchemaAdapter {
     if (schema.anyOf !== undefined) {
       schema.anyOf.forEach(anySchema => {
         if (anySchema.$ref) {
-          if (anySchema.$ref.endsWith('.yaml')) {
-            prop.push(this.getExternalReferences(anySchema.$ref))
-          } else {
-            prop.push(this.getTypeFromReference(anySchema.$ref))
-          }
+          prop.push(this.handleRef(anySchema))
         }
       })
     }
 
     return prop
+  }
+
+  private handleRef(schema: any) {
+    if (schema.$ref.endsWith('.yaml')) {
+      return this.getExternalReferences(schema.$ref)
+    } else {
+      return this.getTypeFromReference(schema.$ref)
+    }
   }
 }
