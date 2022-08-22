@@ -67,17 +67,9 @@ try {
     fs.mkdirSync(outDir)
   }
 
-  // for (const file of schemasFiles) {
-  //   console.log(`${file}:`)
-  //   const fileName = path.join(schemasDir, file)
-  //   const outFile = file.replace('.yaml', '.ts')
-  //   schemaMap.set(file, outFile)
-  //   const api = new Schema(fileName, argv.outDir, outFile)
-  //   api.generateTypes()
-  // }
   runAllSchemas(schemasDir, schemaMap, (path, name, _) => {
     console.log(`${path}:`)
-    const outFile = name.replace('.yaml', '.ts')
+    const outFile = name
     schemaMap.set(name, outFile)
     const api = new Schema(path, argv.outDir, outFile)
     api.generateTypes()
@@ -88,25 +80,11 @@ try {
     const api = new SchemaFromOpenApi(
       filePath,
       argv.outDir,
-      name.replace('.yaml', '.ts'),
+      name,
       schemas,
     )
     api.generateTypes()
   })
-
-  // const referencesFiles = fs.readdirSync(referencesDir)
-
-  // for (const file of referencesFiles) {
-  //   console.log(`${file}:`)
-  //   const fileName = path.join(referencesDir, file)
-  //   const api = new SchemaFromOpenApi(
-  //     fileName,
-  //     argv.outDir,
-  //     file.replace('.yaml', '.ts'),
-  //     schemaMap,
-  //   )
-  //   api.generateTypes()
-  // }
 } catch (error) {
   console.error(error)
   fs.rmdirSync(outDir)

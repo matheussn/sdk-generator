@@ -21,8 +21,20 @@ export class Schema {
   generateTypes() {
     if (this.schemaFile) {
       const model = new SchemaAdapter(this.schemaFile.title, this.schemaFile)
-      const dest = path.join(process.cwd(), this.sourceDir, this.fileName)
+      const name = this.camelize(this.fileName.replace('.yaml', '')) + '.ts'
+      const dest = path.join(process.cwd(), this.sourceDir, name)
       renderTemplate('schema', dest, { models: [model] })
     }
+  }
+
+  private camelize(str: string) {
+    let STR = str.toLowerCase()
+      .trim()
+      .split(/[ -_]/g)
+      .map(word => word.replace(word[0], word[0].toString().toUpperCase()))
+      .join('');
+    // console.log(STR)
+    // const value = STR.replace(STR[0], STR[0].toLowerCase())
+    return STR;
   }
 }

@@ -257,7 +257,7 @@ export class SchemaAdapter {
   }
 
   private handleRef(schema: any) {
-    if (schema.$ref.endsWith('.yaml')) {
+    if (schema.$ref.includes('.yaml')) {
       return this.getExternalReferences(schema.$ref)
     } else {
       return this.getTypeFromReference(schema.$ref)
