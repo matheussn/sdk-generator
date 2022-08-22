@@ -25,7 +25,7 @@
         {% for extension in model.extends %}
           {% if loop.first %} extends {% endif %}{{ extension }}{% if not loop.last %},{% endif %}
         {% endfor %}{ {%- for property in model.properties %}
-        {{ property.name }}: {{ property.type }}{% endfor %}
+        {{ property.name }}: {{ property.type }};{% endfor %}
       }
     {% endif %}
   {% endif %}
