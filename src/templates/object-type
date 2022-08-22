@@ -1,6 +1,6 @@
 {
     {% for property in properties %}
-        {{ property.name }}: {{ property.type }}
+        {{ property.name }}: {{ property.type }};
         {% if not loop.last %}{% endif %}
     {% endfor %}
 }
