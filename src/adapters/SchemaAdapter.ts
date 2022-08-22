@@ -73,7 +73,7 @@ export class SchemaAdapter {
   }
 
   getImports() {
-    return this.imports
+    return this.imports ? this.imports : []
   }
 
   getOmmitProperties() {
@@ -138,7 +138,7 @@ export class SchemaAdapter {
     const { items } = schema
 
     if (items.$ref) {
-      const type = this.getTypeFromReference(items.$ref)
+      const type = this.getExternalReferences(items.$ref)
       return `${type}[]`
     }
 
@@ -166,7 +166,7 @@ export class SchemaAdapter {
     const name = nameFile.split('.')[0]
     this.imports = [
       ...this.imports,
-      { to: name, from: this.schemaMap.get(nameFile).split('.')[0] },
+      { to: name, from: name },
     ]
     return name
   }

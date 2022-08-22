@@ -1,9 +1,11 @@
-{% for import in imports %}
-
-import { {{ import.to }} } from './{{ import.from }}'
-
-{% endfor %}
 {% for model in models %}
+
+  {% for import in model.getImports() %}
+
+  import { {{ import.to }} } from './{{ import.from }}'
+
+  {% endfor %}
+
   {% if model.hasDescription() %}
   /*
    * {{ model.description }}
@@ -23,7 +25,7 @@ import { {{ import.to }} } from './{{ import.from }}'
         {% for extension in model.extends %}
           {% if loop.first %} extends {% endif %}{{ extension }}{% if not loop.last %},{% endif %}
         {% endfor %}{ {%- for property in model.properties %}
-        {{ property.name }}: {{ property.type }};{% endfor %}
+        {{ property.name }}: {{ property.type }}{% endfor %}
       }
     {% endif %}
   {% endif %}
