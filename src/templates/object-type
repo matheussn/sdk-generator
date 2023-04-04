@@ -1,8 +1,8 @@
 {
-    {% for property in properties %}
-        {{ property.name }}: {% if property.isMoreThanOne() %} 
-            {% for type in property.type %} {{ type }} {% if not loop.last %} | {% endif %} {% endfor %}
-            {% else %} {{ property.type }} {% endif %};
-        {% if not loop.last %}{% endif %}
-    {% endfor %}
+  {% for property in properties -%}
+    {{ property.name }}: {% if property.isMoreThanOne() %} 
+      {% for type in property.type %} {{ type }} {% if not loop.last %} | {% endif %} {% endfor %}
+      {% else %} {{ property.type }} {% endif %};
+    {% if not loop.last %}{% endif %}
+  {%- endfor %}
 }

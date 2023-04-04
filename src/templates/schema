@@ -1,26 +1,33 @@
-{% for model in models %}
+{# Loop para realizar os imports necessários, caso haja. #}
+{% for key, value in schemas.getImports() %}
+import { {{ key }} } from './{{ value }}'
+{% endfor %}
 
-  {% for import in model.getImports() %}
 
-  import { {{ import.to }} } from './{{ import.from }}'
-
-  {% endfor %}
-
-  {% if model.hasDescription() %}
+{# loop para pegar todos os modelos definido no schema #}
+{% for key, model in schemas.getModels() %}
+  {# Adicionando descrição #}
+  {% if model.description %}
   /*
    * {{ model.description }}
    **/
   {% endif %}
-  {% if model.isSimpleType or model.isArrayType %}
+    
+  {# Verificando se o modelo é um tipo simples ou um array #}
+  {% if model.isSimple %}
+    {# Se for um modelo simples ou array, apenas realizamos uma criação de um `type` para o mesmo. #}
     export type {{ model.name }} = {{model.type}};
-  {% else %} 
+  {% else %}
+    {# Caso contrário, verificamos se o modelo possui um `omit` #}
     {% if model.hasOmmit() %}
+      {# Caso tenha um `omit`, realizamos a criação de um `type` para o mesmo, omitindo os campos que foram definidos no `omit` #}
       export type {{ model.name }} = Omit<{{model.ommit.type}}, {% for field in model.ommit.fields %}'{{field}}' {% if not loop.last %} | {% endif %}{% endfor %}> & {
         {% for property in model.getOmmitProperties() %}
           {{ property.name }}: {{ property.type }},
         {% endfor %}
       } 
     {% else %}
+      {# Caso não tenha um `omit`, realizamos a criação de um `interface` basica para o mesmo #}
       export interface {{ model.name }} 
         {% for extension in model.extends %}
           {% if loop.first %} extends {% endif %}{{ extension }}{% if not loop.last %},{% endif %}

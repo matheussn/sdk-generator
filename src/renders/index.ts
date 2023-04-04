@@ -3,8 +3,10 @@ import nunjucks from 'nunjucks'
 import prettier from 'prettier'
 import fs from 'fs'
 import { Import, SchemaAdapter } from '../adapters/SchemaAdapter'
+import { SchemasAdapter } from '../adapters/SchemasAdapter'
 
 export interface Params {
+  schemas?: SchemasAdapter
   models?: SchemaAdapter[]
   imports?: Import[]
   properties?: any[]
