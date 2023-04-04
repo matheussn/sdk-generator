@@ -1,11 +1,8 @@
 import path from 'path'
-import { SchemaAdapter } from './adapters/SchemaAdapter'
 import { renderTemplate } from './renders'
 import { SchemasAdapter } from './adapters/SchemasAdapter'
 
 export class SchemaFromOpenApi {
-  private schemaMap: Map<string, string>
-
   constructor(
     private readonly fileName: string,
     private readonly outDir: string,
