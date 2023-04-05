@@ -1,11 +1,19 @@
-import fs from 'fs'
-import YAML from 'yaml'
+import { PropertyAdapter } from '../adapters/PropertyAdapter'
+
+export interface OmmitAdapter {
+  type: string
+  fields: string[]
+}
 
 export class ObjectSchema {
-  private readonly schemaFile: any
+  constructor(
+    readonly name: string,
+    readonly properties: PropertyAdapter[],
+    readonly description: string,
+    readonly ommit: OmmitAdapter = undefined,
+  ) {}
 
-  constructor(fileName: string) {
-    const yamlFile = fs.readFileSync(fileName, 'utf-8')
-    this.schemaFile = YAML.parse(yamlFile)
+  hasOmmit() {
+    return this.ommit !== undefined
   }
 }

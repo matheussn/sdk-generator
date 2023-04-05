@@ -2,8 +2,9 @@
 import path from 'path'
 import fs from 'fs'
 import yargs from 'yargs'
-import { openApiGen, prepareOutDir } from './OpenApi'
+import { openApiGen } from './OpenApi'
 import { exit } from 'process'
+import { prepareOutDir } from './utils/file'
 
 const { argv } = yargs
   .option('basePath', {
@@ -11,33 +12,32 @@ const { argv } = yargs
     description: 'Base Path',
     type: 'string',
   })
-  .option('references', {
+  .option('ref', {
     alias: 'r',
     description: 'Folder contains the openApi references',
     default: 'references',
     type: 'string',
   })
-  .option('schemas', {
+  .option('schema', {
     alias: 's',
     default: 'schemas',
     description: 'Folder contains the schemas references',
     type: 'string',
   })
-  .option('outDir', {
-    alias: 'od',
+  .option('o', {
+    alias: 'o',
     description: 'Output Directory',
     type: 'string',
   })
   .demandOption('basePath')
-  .demandOption('outDir')
+  .demandOption('o')
   .help()
   .alias('help', 'h')
 
 const runAllSchemas = (
   basePath: string,
-  calback: (path: string, name: string) => void,
+  calback: (path: string) => void,
 ) => {
-  console.log(`> ${basePath}`)
   const files = fs.readdirSync(basePath)
 
   for (const fileName of files) {
@@ -48,16 +48,16 @@ const runAllSchemas = (
     if (isDir) {
       runAllSchemas(filePath, calback)
     } else if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
-      calback(filePath, fileName)
+      calback(filePath)
     }
   }
 }
 
-const outDir = path.join(process.cwd(), argv.outDir)
+const outDir = path.join(process.cwd(), argv.o)
 
 try {
-  const referencesDir = path.join(process.cwd(), argv.basePath, argv.references)
-  const schemasDir = path.join(process.cwd(), argv.basePath, argv.schemas)
+  const referencesDir = path.join(process.cwd(), argv.basePath, argv.ref)
+  const schemasDir = path.join(process.cwd(), argv.basePath, argv.schema)
 
   // verify if the references folder exists
   if (!fs.existsSync(referencesDir)) {
@@ -65,14 +65,16 @@ try {
     exit(-1)
   }
 
+  // verify if the schemas folder exists
   if (!fs.existsSync(schemasDir)) {
     console.warn(`The schemas folder does not exist: ${schemasDir}`)
   }
 
   prepareOutDir(outDir)
-  const schemaMap: Map<string, string> = new Map()
-  runAllSchemas(referencesDir, (path, name) => {
-    console.log(`> ${path}`)
+  runAllSchemas(schemasDir, (path) => {
+    openApiGen(path, outDir)
+  })
+  runAllSchemas(referencesDir, (path) => {
     openApiGen(path, outDir)
   })
 } catch (error) {

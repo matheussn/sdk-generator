@@ -1,113 +1,75 @@
 import { renderTemplateToString } from '../renders'
 import { PropertyAdapter } from './PropertyAdapter'
-
-export interface OmmitAdapter {
-  type: string
-  fields: string[]
-}
-
-export interface Import {
-  to: string
-  from: string
-}
+import { ObjectSchema } from '../schemas/ObjectSchema'
+import { SimpleSchema } from '../schemas/SimpleSchema'
 
 export class SchemaAdapter {
-  readonly description: string
-  readonly isSimpleType: boolean
-  readonly isArrayType: boolean
-  extends: string[]
-  ommit: OmmitAdapter
-  type: string
-  imports: Import[]
-  importsV2: Record<string, string>
-  properties: any[]
-
+  private imports: Record<string, string>
+  private model: ObjectSchema | SimpleSchema
   constructor(
-    readonly name: string,
-    readonly schema: any,
-    readonly context?: any,
-    readonly schemaMap?: Map<string, string>,
+    private readonly name: string,
+    private readonly rawSchema: Record<string, any>,
   ) {
-    this.imports = []
-    this.importsV2 = {}
-    this.extends = []
-    this.description = schema.description
-    const schemaType = schema.type
-    this.isSimpleType = this.isSimpleTypeSchemaType(schemaType)
-    this.isArrayType = schemaType === 'array'
-
-    if (schema.allOf) {
-      let extendedModelSchema = schema
-      const hasTypeChange = schema.allOf.some(elem => elem.required !== undefined)
-      schema.allOf.forEach(allOfSchema => {
-        if (hasTypeChange) {
-          this.buildOmmitProperties(allOfSchema)
-        } else if (allOfSchema.$ref) {
-          this.extends.push(this.getTypeFromReference(allOfSchema.$ref))
-        } else {
-          extendedModelSchema = allOfSchema
-        }
-      })
-      this.schema = extendedModelSchema
-    } else if (this.isSimpleType) {
-      this.schema = schema
-      this.type = this.getTypeFromSimpleType(schemaType)
-    } else {
-      this.schema = schema
-      this.type = this.isArrayType ? this.getTypeFromArrayType(schema, name) : undefined
-    }
-
-    if (schema.$ref) {
-      this.handleRef(schema)
-    } else {
-      this.properties = this.setProperties()
-    }
-  }
-
-  hasDescription() {
-    return this.description !== undefined
-  }
-
-  hasOmmit() {
-    return this.ommit !== undefined
+    this.imports = {}
+    this.model = undefined
+    this.buildSchema()
   }
 
   getImports() {
-    return this.importsV2 ? Object.values(this.importsV2) : []
+    return this.imports
   }
 
-  getOmmitProperties() {
+  hasModel(): boolean {
+    return this.model !== undefined
+  }
+
+  getModel(): ObjectSchema | SimpleSchema {
+    return this.model
+  }
+
+  getModels() {
+    return [this.model]
+  }
+
+  private buildSchema() {
+    const schemaType = this.rawSchema.type
+    if (this.isSimpleTypeSchemaType(schemaType)) {
+      this.model = new SimpleSchema(
+        this.name,
+        this.getTypeFromSimpleType(schemaType, this.rawSchema),
+        this.rawSchema.description,
+      )
+      return
+    }
+
+    if (schemaType === 'array') {
+      this.model = new SimpleSchema(
+        this.name,
+        this.getTypeFromArrayType(this.rawSchema, this.name),
+        this.rawSchema.description,
+      )
+      return
+    }
+
+    if (this.rawSchema.$ref) {
+      this.handleRef(this.rawSchema)
+      return
+    }
+
     const properties = []
-    const ommitContext = JSON.parse(JSON.stringify(this.context[this.ommit.type]))
-    let newProp = {}
-    Object.keys(ommitContext.properties).forEach(prop => {
-      if (this.ommit.fields.includes(prop)) {
-        newProp = { ...newProp, [prop]: ommitContext.properties[prop] }
-      }
-    })
-    ommitContext.properties = newProp
-    ommitContext.required = this.ommit.fields
-    this.handleProperties(properties, ommitContext)
-    return properties
+    this.handleProperties(properties, this.rawSchema)
+    this.model = new ObjectSchema(this.name, properties, this.rawSchema.description)
   }
 
-  setProperties() {
-    const properties = []
-    this.handleProperties(properties)
-    // this.handleOfProperties(properties)
-    return properties
-  }
-
-  private isSimpleTypeSchemaType(schemaType: string) {
+  private isSimpleTypeSchemaType(schemaType: string): boolean {
     return ['boolean', 'number', 'string', 'integer'].includes(schemaType)
   }
 
-  private getTypeFromReference(reference: string): string {
-    // reference format: #/components/schemas/<type>
-    return reference.split('/').pop()
-  }
-
-  private getTypeFromSimpleType(schemaType: string, schema?: any, isArray?: boolean) {
+  private getTypeFromSimpleType(
+    schemaType: string,
+    schema?: any,
+    isArray?: boolean,
+  ): string {
     switch (schemaType) {
       case 'boolean':
         return 'boolean'
@@ -119,8 +81,7 @@ export class SchemaAdapter {
     }
   }
 
-  private getTypeFromStringType(schema: any, isArray: boolean) {
-    schema = schema !== null && schema !== undefined ? schema : this.schema
+  private getTypeFromStringType(schema: any, isArray: boolean): string {
     if (schema.enum) {
       const type = `'${schema.enum.join("' | '")}'`
       return isArray ? `(${type})` : type
@@ -131,11 +92,8 @@ export class SchemaAdapter {
     return 'string'
   }
 
-  private getTypeFromArrayType(arraySchemaObject?: any, name?: string) {
-    const schema =
-      arraySchemaObject !== null && arraySchemaObject !== undefined
-        ? arraySchemaObject
-        : this.schema
+  private getTypeFromArrayType(arraySchemaObject: any, name?: string) {
+    const schema = arraySchemaObject
     const { items } = schema
 
     if (items.$ref) {
@@ -170,18 +128,39 @@ export class SchemaAdapter {
     return `${newType}[]`
   }
 
-  private getExternalReferences(refName: string) {
-    const nameFile = this.getTypeFromReference(refName)
-    const name = nameFile.split('.')[0]
-    if(this.importsV2[name] === undefined) {
-      this.importsV2[name] = name
-    }
-    return name
+  private getTypeFromReference(reference: string): string {
+    // reference format: #/components/schemas/<type>
+    return reference.split('/').pop()
   }
 
-  private handleProperties(properties: PropertyAdapter[], schemaObject?: any) {
-    const schema =
-      schemaObject !== null && schemaObject !== undefined ? schemaObject : this.schema
+  private handleRef(schema: any): string {
+    const refName = this.getTypeFromReference(schema.$ref)
+    if (schema.$ref.includes('.yaml')) {
+      const name = refName.split('.')[0]
+      if (this.imports[name] === undefined) {
+        this.imports[name] = name
+      }
+      return name
+    } else {
+      return refName
+    }
+  }
+
+  private handleOfProperties(schema: any) {
+    const prop = []
+
+    if (schema.anyOf !== undefined) {
+      schema.anyOf.forEach(anySchema => {
+        if (anySchema.$ref) {
+          prop.push(this.handleRef(anySchema))
+        }
+      })
+    }
+
+    return prop
+  }
+
+  private handleProperties(properties: PropertyAdapter[], schema: any) {
     const objectProperties =
       schema.properties !== undefined && schema.properties !== undefined
         ? schema.properties
@@ -232,41 +211,5 @@ export class SchemaAdapter {
         properties.push(new PropertyAdapter(propertyNameTs, type))
       }
     })
-  }
-
-  private buildOmmitProperties(allOfSchema: any) {
-    if (allOfSchema.$ref) {
-      this.ommit = {
-        ...this.ommit,
-        type: this.getTypeFromReference(allOfSchema.$ref),
-      }
-    } else {
-      this.ommit = { ...this.ommit, fields: allOfSchema.required }
-    }
-  }
-
-  private handleOfProperties(schemaObject?: any) {
-    const schema =
-      schemaObject !== null && schemaObject !== undefined ? schemaObject : this.schema
-
-    const prop = []
-
-    if (schema.anyOf !== undefined) {
-      schema.anyOf.forEach(anySchema => {
-        if (anySchema.$ref) {
-          prop.push(this.handleRef(anySchema))
-        }
-      })
-    }
-
-    return prop
-  }
-
-  private handleRef(schema: any) {
-    if (schema.$ref.includes('.yaml')) {
-      return this.getExternalReferences(schema.$ref)
-    } else {
-      return this.getTypeFromReference(schema.$ref)
-    }
   }
 }

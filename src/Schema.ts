@@ -1,26 +1,25 @@
 import path from 'path'
 import { renderTemplate } from './renders'
-import { OpenApiAdapter } from './adapters/OpenApiAdapter'
+import { SchemaAdapter } from './adapters/SchemaAdapter'
 import { camelize } from './utils/camelize'
 
-export class SchemaFromOpenApi {
+export class Schema {
   constructor(
     private readonly fileName: string,
     private readonly outDir: string,
     private readonly schemas: Record<string, any>,
   ) {}
 
-  generateTypes(): void {
+  generateTypes() {
     if (this.schemas) {
-      const schemas = new OpenApiAdapter(
-        this.schemas,
-      )
-      schemas.exec()
+      const schemas = new SchemaAdapter(this.fileName, this.schemas)
       const name =
         camelize(path.basename(this.fileName, path.extname(this.fileName))) + '.ts'
       const dest = path.join(this.outDir, name)
 
-      renderTemplate('schema', dest, { schemas })
+      if (schemas.hasModel()) {
+        renderTemplate('schema', dest, { schemas })
+      }
     }
   }
 }

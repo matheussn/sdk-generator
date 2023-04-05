@@ -5,7 +5,7 @@ import { {{ key }} } from './{{ value }}'
 
 
 {# loop para pegar todos os modelos definido no schema #}
-{% for key, model in schemas.getModels() %}
+{% for model in schemas.getModels() %}
   {# Adicionando descrição #}
   {% if model.description %}
   /*

@@ -2,13 +2,11 @@ import path from 'path'
 import nunjucks from 'nunjucks'
 import prettier from 'prettier'
 import fs from 'fs'
-import { Import, SchemaAdapter } from '../adapters/SchemaAdapter'
-import { SchemasAdapter } from '../adapters/SchemasAdapter'
+import { SchemaAdapter } from '../adapters/SchemaAdapter'
+import { OpenApiAdapter } from '../adapters/OpenApiAdapter'
 
 export interface Params {
-  schemas?: SchemasAdapter
-  models?: SchemaAdapter[]
-  imports?: Import[]
+  schemas?: OpenApiAdapter | SchemaAdapter
   properties?: any[]
 }
 
@@ -19,17 +17,19 @@ export const renderTemplateToString = (templateName: string, params: Params) => 
 }
 
 export const renderTemplate = (name: string, destinationFile: string, params: Params) => {
-  const templateDir = path.join(__dirname, '../templates/')
+  const templateDir = path.join(__dirname, '../templates')
   nunjucks.configure(templateDir, { autoescape: false })
   const renderResult = renderTemplateToString(name, params)
   const finalContent = prettier.format(renderResult, {
+    parser: 'typescript',
+    useTabs: false,
+    tabWidth: 2,
+    endOfLine: 'lf',
     singleQuote: true,
     trailingComma: 'all',
     arrowParens: 'avoid',
     printWidth: 90,
-    tabWidth: 2,
     semi: false,
   })
-  console.log(`Create File: ${destinationFile}`)
   fs.writeFileSync(destinationFile, finalContent)
 }

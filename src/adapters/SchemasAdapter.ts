@@ -3,7 +3,7 @@ import { OpenApiRecord } from '../types/OpenApi'
 import { renderTemplateToString } from '../renders'
 import { PropertyAdapter } from './PropertyAdapter'
 import { SimpleSchema } from './SimpleSchema'
-import { ObjectSchema } from './ObjectSchema'
+import { ObjectSchema } from '../schemas/ObjectSchema'
 
 export class SchemasAdapter {
   private imports: Record<string, string>
