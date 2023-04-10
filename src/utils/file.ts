@@ -16,6 +16,10 @@ export const prepareOutDir = (outDir: string) => {
   if (!fs.existsSync(apiDir)) fs.mkdirSync(apiDir)
 }
 
+export const createDir = (dir: string) => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir)
+}
+
 const parseYAML = (schema: any): any => {
   try {
     return yaml.load(schema)

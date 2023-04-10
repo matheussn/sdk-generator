@@ -94,7 +94,6 @@ export class SchemaAdapterOld {
   setProperties() {
     const properties = []
     this.handleProperties(properties)
-    // this.handleOfProperties(properties)
     return properties
   }
 

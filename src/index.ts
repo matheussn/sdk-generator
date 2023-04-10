@@ -2,42 +2,42 @@
 import path from 'path'
 import fs from 'fs'
 import yargs from 'yargs'
-import { openApiGen } from './OpenApi'
+import { openApiGen } from './generator'
 import { exit } from 'process'
 import { prepareOutDir } from './utils/file'
 
-const { argv } = yargs
-  .option('basePath', {
-    alias: 'bp',
-    description: 'Base Path',
-    type: 'string',
+const argv = yargs(process.argv.slice(2))
+  .options({
+    basePath: {
+      alias: 'bp',
+      description: 'Base Path',
+      type: 'string',
+      require: true,
+    },
+    f: {
+      description: 'Folder contains the openApi references',
+      default: false,
+      type: 'boolean',
+    },
+    ref: {
+      alias: 'r',
+      description: 'Folder contains the openApi references',
+      default: 'references',
+      type: 'string',
+    },
+    schema: {
+      alias: 's',
+      default: 'schemas',
+      description: 'Folder contains the schemas references',
+      type: 'string',
+    },
+    o: { description: 'Output Directory', type: 'string', require: true },
   })
-  .option('ref', {
-    alias: 'r',
-    description: 'Folder contains the openApi references',
-    default: 'references',
-    type: 'string',
-  })
-  .option('schema', {
-    alias: 's',
-    default: 'schemas',
-    description: 'Folder contains the schemas references',
-    type: 'string',
-  })
-  .option('o', {
-    alias: 'o',
-    description: 'Output Directory',
-    type: 'string',
-  })
-  .demandOption('basePath')
-  .demandOption('o')
   .help()
   .alias('help', 'h')
+  .parseSync()
 
-const runAllSchemas = (
-  basePath: string,
-  calback: (path: string) => void,
-) => {
+const runAllSchemas = (basePath: string, calback: (path: string) => void) => {
   const files = fs.readdirSync(basePath)
 
   for (const fileName of files) {
@@ -71,13 +71,13 @@ try {
   }
 
   prepareOutDir(outDir)
-  runAllSchemas(schemasDir, (path) => {
-    openApiGen(path, outDir)
+  runAllSchemas(schemasDir, path => {
+    openApiGen(path, outDir, argv.f)
   })
-  runAllSchemas(referencesDir, (path) => {
-    openApiGen(path, outDir)
+  runAllSchemas(referencesDir, path => {
+    openApiGen(path, outDir, argv.f)
   })
 } catch (error) {
   console.error(error)
-  fs.rmdirSync(outDir)
+  fs.rmdirSync(outDir, { recursive: true })
 }
