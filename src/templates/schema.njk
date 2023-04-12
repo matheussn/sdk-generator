@@ -1,6 +1,6 @@
 {# Loop para realizar os imports necessários, caso haja. #}
 {% for key, value in schemas.getImports() %}
-import { {{ key }} } from './{{ value }}'
+import { {{ key }} } from '{{ value }}'
 {% endfor %}
 
 

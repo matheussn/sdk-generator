@@ -7,13 +7,11 @@ import { OpenApi } from '../types/OpenApi'
 // Operações:
 //  - Cria o diretório de saída caso ele não exista
 //  - Cria um subDiretório para os arquivos de tipos com o nome `types`
-//  - Cria um subDiretório para os arquivos de api com o nome `api`
+//  - TODO: Cria um subDiretório para os arquivos de api com o nome `api`
 export const prepareOutDir = (outDir: string) => {
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir)
   const typesDir = path.join(outDir, 'types')
   if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir)
-  const apiDir = path.join(outDir, 'api')
-  if (!fs.existsSync(apiDir)) fs.mkdirSync(apiDir)
 }
 
 export const createDir = (dir: string) => {

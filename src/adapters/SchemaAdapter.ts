@@ -9,6 +9,7 @@ export class SchemaAdapter {
   constructor(
     private readonly name: string,
     private readonly rawSchema: Record<string, any>,
+    private readonly folder: boolean,
   ) {
     this.imports = {}
     this.model = undefined
@@ -138,7 +139,9 @@ export class SchemaAdapter {
     if (schema.$ref.includes('.yaml')) {
       const name = refName.split('.')[0]
       if (this.imports[name] === undefined) {
-        this.imports[name] = name
+        this.imports[name] = this.folder
+          ? `../${name.toLowerCase()}/${name}`
+          : `./${name}`
       }
       return name
     } else {

@@ -7,7 +7,7 @@ export class OpenApiWrapper {
   private modelsImports: Record<string, string> = {}
   private models: Record<string, ObjectSchema | SimpleSchema> = {}
 
-  constructor(private openApi: OpenApi) {
+  constructor(private readonly openApi: OpenApi, private readonly folder: boolean) {
     this.buildModels()
   }
 
@@ -33,7 +33,7 @@ export class OpenApiWrapper {
         console.warn(`Schema ${key} already exists!`)
         return
       }
-      const buildedSchema = new SchemaAdapter(key, value)
+      const buildedSchema = new SchemaAdapter(key, value, this.folder)
       if (buildedSchema.hasModel()) {
         this.models[key] = buildedSchema.getModel()
       }

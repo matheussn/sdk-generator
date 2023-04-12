@@ -14,7 +14,7 @@ export class Schema {
 
   generateTypes(): void {
     if (this.schemas) {
-      const schemas = new SchemaAdapter(this.fileName, this.schemas)
+      const schemas = new SchemaAdapter(this.fileName, this.schemas, this.folder)
       const baseFolder = path.join(
         this.outDir,
         this.folder ? this.fileName.toLocaleLowerCase() : '',

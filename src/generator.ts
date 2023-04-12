@@ -12,11 +12,10 @@ export const openApiGen = (filePath: string, outDir: string, folder: boolean) =>
   const file = loadFile(filePath)
 
   if(isOpenApiFile(file)) {
-    const openApi = new OpenApiWrapper(file as OpenApi)
+    const openApi = new OpenApiWrapper(file as OpenApi, folder)
     const schemaGen = new OpenApiGen(name, typesDir, openApi, folder)
     schemaGen.generateTypes()
     // TODO: generate api sdk
-    schemaGen.generateSDK()
   } else {
     const schemaGen = new Schema(name, typesDir, file, folder)
     schemaGen.generateTypes()

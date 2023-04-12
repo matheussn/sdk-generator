@@ -7,7 +7,10 @@ import { SimpleSchema } from '../schemas/SimpleSchema'
 export class SchemasAdapter {
   private imports: Record<string, string>
   private models: Record<string, ObjectSchema | SimpleSchema>
-  constructor(private readonly rawSchemas: Record<string, OpenApiSchema>) {
+  constructor(
+    private readonly rawSchemas: Record<string, OpenApiSchema>,
+    private readonly folder: boolean,
+  ) {
     this.imports = {}
     this.models = {}
     this.exec()
@@ -27,7 +30,7 @@ export class SchemasAdapter {
         console.warn(`Schema ${key} already exists!`)
         exit(-1)
       }
-      const buildedSchema = new SchemaAdapter(key, value)
+      const buildedSchema = new SchemaAdapter(key, value, this.folder)
       if (buildedSchema.hasModel()) {
         this.models[key] = buildedSchema.getModel()
         if (buildedSchema.getImports()) {
