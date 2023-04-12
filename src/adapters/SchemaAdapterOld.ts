@@ -162,7 +162,7 @@ export class SchemaAdapterOld {
 
     const nestedProperties = []
     this.handleProperties(nestedProperties, items)
-    const type = renderTemplateToString('object-type', {
+    const type = renderTemplateToString('object-type.njk', {
       properties: nestedProperties,
     })
     const newType = type.endsWith('\n') ? type.replace(/\n/g, '') : type
@@ -225,7 +225,7 @@ export class SchemaAdapterOld {
       if (isObjectType && property.properties) {
         const nestedProperties = []
         this.handleProperties(nestedProperties, property)
-        const type = renderTemplateToString('object-type', {
+        const type = renderTemplateToString('object-type.njk', {
           properties: nestedProperties,
         })
         properties.push(new PropertyAdapter(propertyNameTs, type))

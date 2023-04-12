@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
-import { AWSOpenAPI } from '../types/OpenApi'
+import { OpenApi } from '../types/OpenApi'
 
 // função que prepara o diretório de saída
 // Operações:
@@ -29,13 +29,12 @@ const parseYAML = (schema: any): any => {
   }
 }
 
-export const loadFile = (filePath: string): AWSOpenAPI<any> | Record<string, any> => {
-  let schema = undefined
+export const loadFile = (filePath: string): OpenApi | Record<string, any> => {
   const ext = path.extname(filePath).toLowerCase()
   const contents = fs.readFileSync(filePath, 'utf8')
 
   if (ext === '.yaml' || ext === '.yml') return parseYAML(contents)
   // TODO: add support for JSON
 
-  return schema
+  return undefined
 }

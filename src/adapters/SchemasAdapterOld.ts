@@ -1,64 +1,57 @@
+import { exit } from 'process'
+import { OpenApiSchema } from '../types/OpenApi'
 import { renderTemplateToString } from '../renders'
 import { PropertyAdapter } from './PropertyAdapter'
-import { ObjectSchema } from '../schemas/ObjectSchema'
 import { SimpleSchema } from '../schemas/SimpleSchema'
+import { ObjectSchema } from '../schemas/ObjectSchema'
 
-export class SchemaAdapter {
+export class SchemasAdapterOld {
   private imports: Record<string, string>
-  private model: ObjectSchema | SimpleSchema
-  constructor(
-    private readonly name: string,
-    private readonly rawSchema: Record<string, any>,
-  ) {
+  private models: Record<string, any | SimpleSchema>
+  constructor(private readonly rawSchemas: Record<string, OpenApiSchema>) {
     this.imports = {}
-    this.model = undefined
-    this.buildSchema()
+    this.models = {}
+  }
+
+  getModels() {
+    return this.models
   }
 
   getImports() {
     return this.imports
   }
 
-  hasModel(): boolean {
-    return this.model !== undefined
+  exec() {
+    Object.entries(this.rawSchemas).map(([key, value]) => {
+      if (this.models[key]) {
+        console.warn(`Schema ${key} already exists!`)
+        exit(-1)
+      }
+      const buildedSchema = this.buildSchema(key, value)
+      if (buildedSchema) {
+        this.models[key] = buildedSchema
+      }
+    })
   }
 
-  getModel(): ObjectSchema | SimpleSchema {
-    return this.model
-  }
-
-  getSchemas() {
-    return [this.model]
-  }
-
-  private buildSchema() {
-    const schemaType = this.rawSchema.type
+  private buildSchema(name: string, schema: any) {
+    const schemaType = schema.type
     if (this.isSimpleTypeSchemaType(schemaType)) {
-      this.model = new SimpleSchema(
-        this.name,
-        this.getTypeFromSimpleType(schemaType, this.rawSchema),
-        this.rawSchema.description,
-      )
-      return
+      return new SimpleSchema(name, this.getTypeFromSimpleType(schemaType, schema), schema.description)
     }
 
     if (schemaType === 'array') {
-      this.model = new SimpleSchema(
-        this.name,
-        this.getTypeFromArrayType(this.rawSchema, this.name),
-        this.rawSchema.description,
-      )
-      return
+      return new SimpleSchema(name, this.getTypeFromArrayType(schema, name), schema.description)
     }
 
-    if (this.rawSchema.$ref) {
-      this.handleRef(this.rawSchema)
+    if (schema.$ref) {
+      this.handleRef(schema)
       return
     }
 
     const properties = []
-    this.handleProperties(properties, this.rawSchema)
-    this.model = new ObjectSchema(this.name, properties, this.rawSchema.description)
+    this.handleProperties(properties, schema)
+    return new ObjectSchema(name, properties, schema.description)
   }
 
   private isSimpleTypeSchemaType(schemaType: string): boolean {

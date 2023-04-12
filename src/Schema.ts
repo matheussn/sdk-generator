@@ -15,14 +15,17 @@ export class Schema {
   generateTypes(): void {
     if (this.schemas) {
       const schemas = new SchemaAdapter(this.fileName, this.schemas)
-      const baseFolder = path.join(this.outDir, this.fileName.toLocaleLowerCase())
+      const baseFolder = path.join(
+        this.outDir,
+        this.folder ? this.fileName.toLocaleLowerCase() : '',
+      )
       const name = camelize(this.fileName) + '.ts'
       const dest = path.join(baseFolder, name)
 
       if (this.folder) createDir(baseFolder)
 
       if (schemas.hasModel()) {
-        renderTemplate('schema', dest, { schemas })
+        renderTemplate('schema.njk', dest, { schemas })
       }
     }
   }

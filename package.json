@@ -1,15 +1,12 @@
 {
-  "name": "@matheussn/sdk-generator",
-  "version": "0.0.15",
+  "name": "@matheussn/sdk-gen",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
     "package.json"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/matheussn"
-  },
   "dependencies": {
     "nunjucks": "^3.2.3",
     "prettier": "^2.7.1",

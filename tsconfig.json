@@ -9,7 +9,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "dist",
-    "sourceMap": true,
+    "sourceMap": false,
     "target": "esnext",
     "declaration": true
   },

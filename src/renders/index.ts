@@ -3,10 +3,12 @@ import nunjucks from 'nunjucks'
 import prettier from 'prettier'
 import fs from 'fs'
 import { SchemaAdapter } from '../adapters/SchemaAdapter'
-import { OpenApiAdapter } from '../adapters/OpenApiAdapter'
+import { SchemasAdapter } from '../adapters/SchemasAdapter'
+import { OpenApiWrapper } from '../wrapper/OpenApiWrapper'
 
 export interface Params {
-  schemas?: OpenApiAdapter | SchemaAdapter
+  openApi?: OpenApiWrapper
+  schemas?: SchemasAdapter | SchemaAdapter
   properties?: any[]
 }
 
