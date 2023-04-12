@@ -79,5 +79,5 @@ try {
   })
 } catch (error) {
   console.error(error)
-  fs.rmdirSync(outDir, { recursive: true })
+  fs.rmSync(outDir, { recursive: true })
 }
