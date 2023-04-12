@@ -13,14 +13,13 @@ export interface Params {
 }
 
 export const renderTemplateToString = (templateName: string, params: Params) => {
-  const templatesDir = path.join(__dirname, '../templates')
-  const template = path.join(templatesDir, templateName)
+  const templateDir = path.join(__dirname, '../templates')
+  nunjucks.configure(templateDir, { autoescape: false })
+  const template = path.join(templateDir, templateName)
   return nunjucks.render(template, params)
 }
 
 export const renderTemplate = (name: string, destinationFile: string, params: Params) => {
-  const templateDir = path.join(__dirname, '../templates')
-  nunjucks.configure(templateDir, { autoescape: false })
   const renderResult = renderTemplateToString(name, params)
   const finalContent = prettier.format(renderResult, {
     parser: 'typescript',
