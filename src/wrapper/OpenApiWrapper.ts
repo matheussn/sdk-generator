@@ -36,9 +36,9 @@ export class OpenApiWrapper {
       const buildedSchema = new SchemaAdapter(key, value)
       if (buildedSchema.hasModel()) {
         this.models[key] = buildedSchema.getModel()
-        if (buildedSchema.getImports()) {
-          this.modelsImports = { ...this.modelsImports, ...buildedSchema.getImports() }
-        }
+      }
+      if (buildedSchema.getImports()) {
+        this.modelsImports = { ...this.modelsImports, ...buildedSchema.getImports() }
       }
     })
   }
