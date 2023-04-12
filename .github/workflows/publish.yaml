@@ -27,22 +27,10 @@ jobs:
           sudo timedatectl set-timezone Etc/GMT+3
           npm run build
 
-      - name: Version Check
-        id: check
-        uses: EndBug/version-check@v2.0.1
-        with:
-          diff-search: true
-          file-name: package.json
-
       - name: Publish Package
-        if: steps.check.outputs.changed == 'true'
         run: |
           echo "Version change found in commit ${{ steps.check.outputs.commit }}!"
           echo "New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_AUTH_TOKEN }}
-
-      - name: Checking unchanged version package
-        if: steps.check.outputs.changed == 'false'
-        run: echo "No version change :/" && exit -1
