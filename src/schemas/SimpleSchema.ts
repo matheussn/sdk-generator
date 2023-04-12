@@ -5,4 +5,8 @@ export class SimpleSchema {
     readonly description: string,
     readonly isSimple: boolean = true,
   ) {}
+
+  getType(): string {
+    return 'simple'
+  }
 }

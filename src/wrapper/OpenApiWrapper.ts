@@ -1,11 +1,12 @@
 import { SchemaAdapter } from '../adapters/SchemaAdapter'
+import { EnumSchema } from '../schemas/EnumSchema'
 import { ObjectSchema } from '../schemas/ObjectSchema'
 import { SimpleSchema } from '../schemas/SimpleSchema'
 import { OpenApi } from '../types/OpenApi'
 
 export class OpenApiWrapper {
   private modelsImports: Record<string, string> = {}
-  private models: Record<string, ObjectSchema | SimpleSchema> = {}
+  private models: Record<string, ObjectSchema | SimpleSchema | EnumSchema> = {}
 
   constructor(private readonly openApi: OpenApi, private readonly folder: boolean) {
     this.buildModels()

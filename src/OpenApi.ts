@@ -1,6 +1,6 @@
 import path from 'path'
 import { renderTemplate } from './renders'
-import { camelize } from './utils/camelize'
+import { camelize } from './utils/string'
 import { createDir } from './utils/file'
 import { OpenApiWrapper } from './wrapper/OpenApiWrapper'
 

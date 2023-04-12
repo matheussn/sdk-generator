@@ -16,4 +16,8 @@ export class ObjectSchema {
   hasOmmit() {
     return this.ommit !== undefined
   }
+
+  getType(): string {
+    return 'object'
+  }
 }

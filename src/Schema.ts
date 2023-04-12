@@ -1,7 +1,7 @@
 import path from 'path'
 import { renderTemplate } from './renders'
 import { SchemaAdapter } from './adapters/SchemaAdapter'
-import { camelize } from './utils/camelize'
+import { camelize } from './utils/string'
 import { createDir } from './utils/file'
 
 export class Schema {

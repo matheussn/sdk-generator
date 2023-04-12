@@ -2,10 +2,11 @@ import { renderTemplateToString } from '../renders'
 import { PropertyAdapter } from './PropertyAdapter'
 import { ObjectSchema } from '../schemas/ObjectSchema'
 import { SimpleSchema } from '../schemas/SimpleSchema'
+import { EnumSchema } from '../schemas/EnumSchema'
 
 export class SchemaAdapter {
   private imports: Record<string, string>
-  private model: ObjectSchema | SimpleSchema
+  private model: ObjectSchema | SimpleSchema | EnumSchema
   constructor(
     private readonly name: string,
     private readonly rawSchema: Record<string, any>,
@@ -24,7 +25,7 @@ export class SchemaAdapter {
     return this.model !== undefined
   }
 
-  getModel(): ObjectSchema | SimpleSchema {
+  getModel(): ObjectSchema | SimpleSchema | EnumSchema {
     return this.model
   }
 
@@ -34,6 +35,12 @@ export class SchemaAdapter {
 
   private buildSchema() {
     const schemaType = this.rawSchema.type
+
+    if(this.isEnumType(this.rawSchema)) {
+      this.model = new EnumSchema(this.name, this.rawSchema.enum, this.rawSchema.description)
+      return
+    }
+
     if (this.isSimpleTypeSchemaType(schemaType)) {
       this.model = new SimpleSchema(
         this.name,
@@ -60,6 +67,10 @@ export class SchemaAdapter {
     const properties = []
     this.handleProperties(properties, this.rawSchema)
     this.model = new ObjectSchema(this.name, properties, this.rawSchema.description)
+  }
+
+  private isEnumType(schema: Record<string, any>): boolean {
+    return schema.type == 'string' && schema.enum !== undefined
   }
 
   private isSimpleTypeSchemaType(schemaType: string): boolean {
