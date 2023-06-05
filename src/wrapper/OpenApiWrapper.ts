@@ -1,12 +1,9 @@
 import { SchemaAdapter } from '../adapters/SchemaAdapter'
-import { EnumSchema } from '../schemas/EnumSchema'
-import { ObjectSchema } from '../schemas/ObjectSchema'
-import { SimpleSchema } from '../schemas/SimpleSchema'
 import { OpenApi } from '../types/OpenApi'
 
 export class OpenApiWrapper {
-  private modelsImports: Record<string, string> = {}
-  private models: Record<string, ObjectSchema | SimpleSchema | EnumSchema> = {}
+  private imports: Record<string, string> = {}
+  public schemas: SchemaAdapter[] = []
 
   constructor(private readonly openApi: OpenApi, private readonly folder: boolean) {
     this.buildModels()
@@ -21,25 +18,21 @@ export class OpenApiWrapper {
   }
 
   getSchemas() {
-    return Object.values(this.models)
+    return Object.values(this.schemas)
   }
 
   getImports() {
-    return this.modelsImports
+    return this.imports
   }
 
   private buildModels() {
     Object.entries(this.openApi?.components?.schemas || {}).map(([key, value]) => {
-      if (this.models[key]) {
-        console.warn(`Schema ${key} already exists!`)
-        return
-      }
-      const buildedSchema = new SchemaAdapter(key, value, this.folder)
+      const buildedSchema = new SchemaAdapter(value, this.folder, key)
       if (buildedSchema.hasModel()) {
-        this.models[key] = buildedSchema.getModel()
+        this.schemas.push(buildedSchema)
       }
       if (buildedSchema.getImports()) {
-        this.modelsImports = { ...this.modelsImports, ...buildedSchema.getImports() }
+        this.imports = { ...this.imports, ...buildedSchema.getImports() }
       }
     })
   }

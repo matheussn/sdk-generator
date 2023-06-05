@@ -180,60 +180,84 @@ export interface Reference extends XAttr {
   description?: string
 }
 
+type Test2 = { description: boolean }
+
+type Test = {
+  name: string
+} & Test2
+
+const test = (test: Test) => {
+  test.description
+}
+
 export type OpenApiSchema = {
-  discriminator?: DiscriminatorObject
-  xml?: XMLObject
-  externalDocs?: OpenApiExternalDocs
-  example?: any
+  type: string
   title?: string
   description?: string
-  $comment?: string
-  deprecated?: boolean
-  readOnly?: boolean
-  writeOnly?: boolean
-  enum?: unknown[]
-  const?: unknown
-  default?: unknown
-  format?: string
-  nullable?: boolean
-  [key: `x-${string}`]: any
-} & (
-  | { oneOf: (OpenApiSchema | Reference)[] }
-  | {
-      type: ('string' | 'number' | 'integer' | 'array' | 'boolean' | 'null' | 'object')[]
-    }
-  | { type: 'string' }
-  | { type: 'number'; minimum?: number; maximum?: number }
-  | { type: 'integer'; minimum?: number; maximum?: number }
-  | {
-      type: 'array'
-      prefixItems?: OpenApiSchema | Reference
-      items?: OpenApiSchema | Reference
-      minItems?: number
-      maxItems?: number
-    }
-  | { type: 'boolean' }
-  | { type: 'null' }
-  | {
-      type: 'object'
-      properties?: { [name: string]: OpenApiSchema | Reference }
-      additionalProperties?: boolean | Record<string, never> | OpenApiSchema | Reference
-      required?: string[]
-      allOf?: (OpenApiSchema | Reference)[]
-      anyOf?: (OpenApiSchema | Reference)[]
-    }
-  | {
-      allOf: (OpenApiSchema | Reference)[]
-      anyOf?: (OpenApiSchema | Reference)[]
-      required?: string[]
-    }
-  | {
-      allOf?: (OpenApiSchema | Reference)[]
-      anyOf: (OpenApiSchema | Reference)[]
-      required?: string[]
-    }
-  | {}
-)
+  anyOf?: (OpenApiSchema | Reference)[]
+  enum?: string[]
+  items?: OpenApiSchema
+  $ref?: string
+  properties?: { [name: string]: OpenApiSchema }
+  required?: string[]
+}
+
+// {
+//   discriminator?: DiscriminatorObject
+//   xml?: XMLObject
+//   externalDocs?: OpenApiExternalDocs
+//   example?: any
+//   title?: string
+//   // type: string
+//   // $ref?: string
+//   description?: string
+//   $comment?: string
+//   deprecated?: boolean
+//   readOnly?: boolean
+//   writeOnly?: boolean
+//   // enum?: string[]
+//   const?: unknown
+//   default?: unknown
+//   format?: string
+//   nullable?: boolean
+//   [key: `x-${string}`]: any
+// } & (
+//   | { oneOf: (OpenApiSchema | Reference)[] }
+//   | {
+//       type: ('string' | 'number' | 'integer' | 'array' | 'boolean' | 'null' | 'object')[]
+//     }
+//   | { type: 'string' }
+//   | { type: 'number'; minimum?: number; maximum?: number }
+//   | { type: 'integer'; minimum?: number; maximum?: number }
+//   | {
+//       type: 'array'
+//       prefixItems?: OpenApiSchema | Reference
+//       items?: OpenApiSchema | Reference
+//       minItems?: number
+//       maxItems?: number
+//     }
+//   | { type: 'boolean' }
+//   | { type: 'null' }
+//   | {
+//       type: 'object'
+//       properties?: { [name: string]: OpenApiSchema | Reference }
+//       additionalProperties?: boolean | Record<string, never> | OpenApiSchema | Reference
+//       required?: string[]
+//       allOf?: (OpenApiSchema | Reference)[]
+//       anyOf?: (OpenApiSchema | Reference)[]
+//     }
+//   | {
+//       allOf: (OpenApiSchema | Reference)[]
+//       anyOf?: (OpenApiSchema | Reference)[]
+//       required?: string[]
+//     }
+//   | {
+//       allOf?: (OpenApiSchema | Reference)[]
+//       anyOf: (OpenApiSchema | Reference)[]
+//       required?: string[]
+//     }
+//   | {}
+// )
 
 export interface DiscriminatorObject {
   propertyName: string

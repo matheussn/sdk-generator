@@ -1,0 +1,5 @@
+{% set description = schema.description %}
+{% include "../base/js_doc.njk" %}
+export enum {{ schema.name }} {
+    {% for content in schema.content %}{{ content.name }} = '{{content.value}}'{% if not loop.last %},{% endif %}{% endfor %}
+}

@@ -2,9 +2,9 @@
 import path from 'path'
 import fs from 'fs'
 import yargs from 'yargs'
-import { openApiGen } from './generator'
 import { exit } from 'process'
 import { prepareOutDir } from './utils/file'
+import { Generator } from './Gen'
 
 const argv = yargs(process.argv.slice(2))
   .options({
@@ -37,22 +37,6 @@ const argv = yargs(process.argv.slice(2))
   .alias('help', 'h')
   .parseSync()
 
-const runAllSchemas = (basePath: string, calback: (path: string) => void) => {
-  const files = fs.readdirSync(basePath)
-
-  for (const fileName of files) {
-    const filePath = path.join(basePath, fileName)
-
-    const isDir = fs.statSync(filePath).isDirectory()
-
-    if (isDir) {
-      runAllSchemas(filePath, calback)
-    } else if (fileName.endsWith('.yaml') || fileName.endsWith('.yml')) {
-      calback(filePath)
-    }
-  }
-}
-
 const outDir = path.join(process.cwd(), argv.o)
 
 try {
@@ -71,12 +55,15 @@ try {
   }
 
   prepareOutDir(outDir)
-  runAllSchemas(schemasDir, path => {
-    openApiGen(path, outDir, argv.f)
-  })
-  runAllSchemas(referencesDir, path => {
-    openApiGen(path, outDir, argv.f)
-  })
+
+  // Passar pelos arquivos de schema preparando as informações para gerar os arquivos
+  // Salvar essas informações em um mapa (nome do arquivo => informações)
+
+  // Passar pelos arquivos de referência preparando as informações para gerar os arquivos
+  // Salvar essas informações em um mapa (nome do arquivo => informações)
+
+  const gen = new Generator(argv.basePath, argv.ref, outDir, argv.f, argv.schema)
+  gen.generateTypes()
 } catch (error) {
   console.error(error)
   fs.rmSync(outDir, { recursive: true })

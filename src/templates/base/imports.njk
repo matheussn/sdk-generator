@@ -1,0 +1,2 @@
+{# Loop para realizar os imports necessários, caso haja. #}
+{% for key, value in imports %}import { {{ key }} } from '{{ value }}';{% endfor %}

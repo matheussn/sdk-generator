@@ -1,0 +1,3 @@
+{% set description = schema.description %}
+{% include "../base/js_doc.njk" %}
+export type {{ schema.name }} = {{schema.content}};

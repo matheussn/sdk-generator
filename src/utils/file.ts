@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
-import { OpenApi } from '../types/OpenApi'
+import { OpenApi, OpenApiSchema } from '../types/OpenApi'
 
 // função que prepara o diretório de saída
 // Operações:
@@ -10,8 +10,8 @@ import { OpenApi } from '../types/OpenApi'
 //  - TODO: Cria um subDiretório para os arquivos de api com o nome `api`
 export const prepareOutDir = (outDir: string) => {
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir)
-  const typesDir = path.join(outDir, 'types')
-  if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir)
+  // const typesDir = path.join(outDir, 'types')
+  // if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir)
 }
 
 export const createDir = (dir: string) => {
@@ -27,7 +27,9 @@ const parseYAML = (schema: any): any => {
   }
 }
 
-export const loadFile = (filePath: string): OpenApi | Record<string, any> => {
+export const loadFile = (
+  filePath: string,
+): OpenApi | Record<string, any> | OpenApiSchema => {
   const ext = path.extname(filePath).toLowerCase()
   const contents = fs.readFileSync(filePath, 'utf8')
 
