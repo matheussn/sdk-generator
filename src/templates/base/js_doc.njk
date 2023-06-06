@@ -1,11 +1,12 @@
 {% set comments = [] %}
-{% set comments = (comments.push(description), comments) if description else comments %}
+{% set comments = (comments.push(field.description), comments) if field.description else comments %}
 {% set commentsLength = comments | length %}
 {% if commentsLength == 1 %} 
 /** {{comments[0]}} */
 {% elif commentsLength > 0 %}
-/**{% for comment in comments %}
-* {{ comment-}}
-{%- endfor %}
+/**
+{% for comment in comments %}
+* {{ comment }}
+{% endfor %}
 */
 {% endif %}
