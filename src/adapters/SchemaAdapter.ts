@@ -293,7 +293,6 @@ export class SchemaAdapter {
           if (oneSchema.$ref) {
             types.push(this.handleRef(oneSchema))
           } else {
-            console.log('oneSchema', oneSchema)
             const castedSchema = oneSchema as OpenApiSchema
             const dependentObject = new SchemaAdapter(
               castedSchema,
