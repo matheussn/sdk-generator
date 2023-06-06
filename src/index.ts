@@ -19,6 +19,11 @@ const argv = yargs(process.argv.slice(2))
       default: false,
       type: 'boolean',
     },
+    p: {
+      description: 'Run prettier after generate the files',
+      default: true,
+      type: 'boolean',
+    },
     ref: {
       alias: 'r',
       description: 'Folder contains the openApi references',
@@ -62,7 +67,7 @@ try {
   // Passar pelos arquivos de referência preparando as informações para gerar os arquivos
   // Salvar essas informações em um mapa (nome do arquivo => informações)
 
-  const gen = new Generator(argv.basePath, argv.ref, outDir, argv.f, argv.schema)
+  const gen = new Generator(argv.basePath, argv.ref, outDir, argv.f,  argv.p, argv.schema)
   gen.generateTypes()
 } catch (error) {
   console.error(error)

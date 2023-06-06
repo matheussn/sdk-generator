@@ -22,6 +22,7 @@ export class Generator {
     private readonly referencePath: string,
     private readonly outDir: string,
     private readonly folder: boolean,
+    private readonly prettier: boolean,
     private readonly schemaPath?: string,
   ) {
     this.loadSchemas()
@@ -56,7 +57,7 @@ export class Generator {
 
         if(schema === '') continue
 
-        createFile(dest, `${imports}\n${dependenciesString}\n${schema}`)
+        createFile(dest, `${imports}\n${dependenciesString}\n${schema}`, this.prettier)
         continue
       } else {
         const dependencies = schemas.map(schema => schema.getDependencies()).flat()
@@ -70,7 +71,7 @@ export class Generator {
         const importString = render[SchemaType.IMPORTS]({ imports: value.imports })
 
         if(modelsString === '') continue
-        createFile(dest, `${importString}\n${dependenciesString}\n${modelsString}`)
+        createFile(dest, `${importString}\n${dependenciesString}\n${modelsString}`, this.prettier)
       }
     }
   }

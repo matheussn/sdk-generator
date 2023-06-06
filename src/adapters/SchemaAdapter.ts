@@ -311,8 +311,6 @@ export class SchemaAdapter {
           isRequired,
           type: types.join(' | '),
         } as BaseField)
-        // const nestedProperties = this.handleOfProperties(property)
-        // return nestedProperties.map(prop => `${prop}[]`).join(' | ')
       }
     })
   }

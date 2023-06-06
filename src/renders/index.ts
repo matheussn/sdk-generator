@@ -37,8 +37,8 @@ export const renderTemplate = (name: string, destinationFile: string, params: Pa
   fs.writeFileSync(destinationFile, finalContent)
 }
 
-export const createFile = (dest: string, content: string) => {
-  const finalContent = prettier.format(content, {
+const applyPrettier = (content: string) =>
+  prettier.format(content, {
     parser: 'typescript',
     useTabs: false,
     tabWidth: 2,
@@ -49,7 +49,9 @@ export const createFile = (dest: string, content: string) => {
     printWidth: 90,
     semi: false,
   })
-  fs.writeFileSync(dest, finalContent)
+
+export const createFile = (dest: string, content: string, runPrettier: boolean) => {
+  fs.writeFileSync(dest, runPrettier ? applyPrettier(content) : content)
 }
 
 export const render = {
@@ -59,7 +61,8 @@ export const render = {
     renderTemplateToString('schemas/simple.njk', params),
   [SchemaType.OBJECT]: (params: Params) =>
     renderTemplateToString('schemas/object.njk', params),
-  [SchemaType.IMPORTS]: (params: Params) => renderTemplateToString('base/imports.njk', params),
+  [SchemaType.IMPORTS]: (params: Params) =>
+    renderTemplateToString('base/imports.njk', params),
 }
 
 export const renderAndSave = {
