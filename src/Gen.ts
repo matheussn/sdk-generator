@@ -53,6 +53,9 @@ export class Generator {
         const type = model.type
         const imports = render[SchemaType.IMPORTS]({ imports: value.imports })
         const schema = render[type]({ schema: model })
+
+        if(schema === '') continue
+
         createFile(dest, `${imports}\n${dependenciesString}\n${schema}`)
         continue
       } else {
@@ -66,6 +69,7 @@ export class Generator {
           .join('\n')
         const importString = render[SchemaType.IMPORTS]({ imports: value.imports })
 
+        if(modelsString === '') continue
         createFile(dest, `${importString}\n${dependenciesString}\n${modelsString}`)
       }
     }
