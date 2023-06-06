@@ -16,7 +16,7 @@ export interface Params {
 
 export const renderTemplateToString = (templateName: string, params: Params) => {
   const templateDir = path.join(__dirname, '../templates')
-  nunjucks.configure(templateDir, { autoescape: false })
+  nunjucks.configure(templateDir, { autoescape: false, trimBlocks: true })
   const template = path.join(templateDir, templateName)
   return nunjucks.render(template, params)
 }

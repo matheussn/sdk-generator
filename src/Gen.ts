@@ -7,7 +7,6 @@ import { createFile, render } from './renders'
 import { OpenApiWrapper } from './wrapper/OpenApiWrapper'
 import { SchemaType } from './schemas/BaseSchema'
 
-
 export interface FileAdapter {
   imports: Record<string, string>
   schemas: SchemaAdapter[]
@@ -40,39 +39,22 @@ export class Generator {
 
       const schemas = Object.values(value.schemas)
 
-      if (schemas.length === 1) {
-        const model = schemas[0].getModel()
-        const dependencies = schemas[0].getDependencies()
-        let dependenciesString = ''
+      const dependencies = schemas.map(schema => schema.getDependencies()).flat()
+      const models = schemas.map(schema => schema.getModel())
+      const dependenciesString = dependencies
+        .map(dependency => render[dependency.type]({ schema: dependency }))
+        .join('\n\n')
+      const modelsString = models
+        .map(model => render[model.type]({ schema: model }))
+        .join('\n\n')
+      const importString = render[SchemaType.IMPORTS]({ imports: value.imports })
 
-        if (dependencies) {
-          dependencies.forEach(dependency => {
-            dependenciesString += render[dependency.type]({ schema: dependency })
-          })
-        }
-
-        const type = model.type
-        const imports = render[SchemaType.IMPORTS]({ imports: value.imports })
-        const schema = render[type]({ schema: model })
-
-        if(schema === '') continue
-
-        createFile(dest, `${imports}\n${dependenciesString}\n${schema}`, this.prettier)
-        continue
-      } else {
-        const dependencies = schemas.map(schema => schema.getDependencies()).flat()
-        const models = schemas.map(schema => schema.getModel())
-        const dependenciesString = dependencies
-          .map(dependency => render[dependency.type]({ schema: dependency }))
-          .join('\n')
-        const modelsString = models
-          .map(model => render[model.type]({ schema: model }))
-          .join('\n')
-        const importString = render[SchemaType.IMPORTS]({ imports: value.imports })
-
-        if(modelsString === '') continue
-        createFile(dest, `${importString}\n${dependenciesString}\n${modelsString}`, this.prettier)
-      }
+      if (modelsString === '') continue
+      createFile(
+        dest,
+        `${importString}\n${dependenciesString}\n${modelsString}`,
+        this.prettier,
+      )
     }
   }
 
@@ -117,7 +99,11 @@ export class Generator {
       }
     } else {
       const openApiSchema = file as OpenApiSchema
-      const schema = new SchemaAdapter(openApiSchema, this.folder, fileName.replace('.yaml', ''))
+      const schema = new SchemaAdapter(
+        openApiSchema,
+        this.folder,
+        fileName.replace('.yaml', ''),
+      )
       this.schemas = {
         ...this.schemas,
         [fileName]: {

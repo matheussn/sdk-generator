@@ -1,9 +1,15 @@
 {% set description = schema.description %}
 {% include "../base/js_doc.njk" %}
-export interface {{ schema.name -}}
+export interface {{ schema.name }}
     {% for extension in schema.extends %}
     {% if loop.first %} extends {% endif %}{{ extension }}{% if not loop.last %},{% endif %}
     {% endfor %}
 { 
-    {% for property in schema.content %}{{ property.name }}{{ "" if property.isRequired else "?" }}:{{ property.type }};{% endfor -%}
-}
+    {% for property in schema.content -%}
+        {% if property.description %}
+            {% set description = property.description %}
+            {% include "../base/js_doc.njk" %}
+        {% endif %}
+        {{ property.name }}{{ "" if property.isRequired else "?" }}:{{ property.type }};
+    {%- endfor %}
+};
