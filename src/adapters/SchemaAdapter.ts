@@ -158,15 +158,21 @@ export class SchemaAdapter {
       return nestedProperties.map(prop => `${prop}[]`).join(' | ')
     }
 
-    const nestedProperties: BaseField[] = []
-    this.handleProperties(nestedProperties, items)
-    this.dependencies.push({
-      name: items.title,
-      type: SchemaType.OBJECT,
-      description: this.rawSchema?.description,
-      content: nestedProperties,
-    } as ObjectSchema)
-    return `${items.title}[]`
+    if (items.type == 'object' && items.properties) {
+      const nestedProperties: BaseField[] = []
+      this.handleProperties(nestedProperties, items)
+      this.dependencies.push({
+        name: items.title,
+        type: SchemaType.OBJECT,
+        description: this.rawSchema?.description,
+        content: nestedProperties,
+      } as ObjectSchema)
+      return `${items.title}[]`
+    }
+
+    if (items.type == 'object' && !items.properties) {
+      return `Object[]`
+    }
   }
 
   private getTypeFromReference(reference: string): string {
@@ -253,7 +259,7 @@ export class SchemaAdapter {
 
       const isObjectType = property.type === 'object'
       // Verificando se a propriedade é um objeto e não possui propriedades filha, se for, adiciona uma propriedade com o nome e o tipo do objeto
-      if (isObjectType && !property.properties) {
+      if (isObjectType && !property.properties && !property.anyOf && !property.oneOf) {
         properties.push({
           name: propertyName,
           description: property?.description,
@@ -278,6 +284,36 @@ export class SchemaAdapter {
           isRequired,
           type: model.name,
         } as BaseField)
+      }
+
+      const isOneOf = property.oneOf !== undefined
+      if (isObjectType && isOneOf) {
+        const types = []
+        property.oneOf.forEach(oneSchema => {
+          if (oneSchema.$ref) {
+            types.push(this.handleRef(oneSchema))
+          } else {
+            console.log('oneSchema', oneSchema)
+            const castedSchema = oneSchema as OpenApiSchema
+            const dependentObject = new SchemaAdapter(
+              castedSchema,
+              this.folder,
+              castedSchema.title.charAt(0).toUpperCase() + castedSchema.title.slice(1),
+            )
+            this.imports = { ...this.imports, ...dependentObject.getImports() }
+            const model = dependentObject.getModel()
+            this.dependencies.push(model, ...dependentObject.getDependencies())
+            types.push(model.name)
+          }
+        })
+        properties.push({
+          name: propertyName,
+          description: property?.description,
+          isRequired,
+          type: types.join(' | '),
+        } as BaseField)
+        // const nestedProperties = this.handleOfProperties(property)
+        // return nestedProperties.map(prop => `${prop}[]`).join(' | ')
       }
     })
   }

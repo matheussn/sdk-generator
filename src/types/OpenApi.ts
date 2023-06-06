@@ -195,6 +195,7 @@ export type OpenApiSchema = {
   title?: string
   description?: string
   anyOf?: (OpenApiSchema | Reference)[]
+  oneOf?: (OpenApiSchema | Reference)[]
   enum?: string[]
   items?: OpenApiSchema
   $ref?: string
