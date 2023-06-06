@@ -158,13 +158,15 @@ export class SchemaAdapter {
       return nestedProperties.map(prop => `${prop}[]`).join(' | ')
     }
 
-    // const nestedProperties = []
-    // this.handleProperties(nestedProperties, items)
-    // const type = renderTemplateToString('object-type.njk', {
-    //   properties: nestedProperties,
-    // })
-    // const newType = type.endsWith('\n') ? type.replace(/\n/g, '') : type
-    return 'any[]' //`${newType}[]`
+    const nestedProperties: BaseField[] = []
+    this.handleProperties(nestedProperties, items)
+    this.dependencies.push({
+      name: items.title,
+      type: SchemaType.OBJECT,
+      description: this.rawSchema?.description,
+      content: nestedProperties,
+    } as ObjectSchema)
+    return `${items.title}[]`
   }
 
   private getTypeFromReference(reference: string): string {
